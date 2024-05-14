@@ -1,0 +1,9 @@
+*Rhistory
+*DS_Store
+*.aux
+*.log
+*.bbl
+*.synctex.gz
+*.out
+*.snm
+*.nav

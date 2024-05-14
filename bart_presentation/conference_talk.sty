@@ -1,0 +1,67 @@
+\usepackage{amsmath, amssymb, amsthm, bm, bbm} % math stuff
+\usepackage{hyperref}
+\usepackage{comment}
+\usepackage{graphicx, xcolor}
+\usepackage{tikzsymbols}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{algorithmicx}
+
+% math stuff
+\DeclareMathOperator*{\argmax}{arg\,max} % needs to be in the preamble
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\newcommand{\R}{\mathbb{R}} % boldfaced R for the reals
+\newcommand{\E}{\mathbb{E}} % boldfaced E for expectations
+\def\P{\mathbb{P}} % boldfaced P for probability. overriding \P for paragraph symbol
+
+\newcommand{\calP}{\mathcal{P}} % caligraphic P for a generic distribution
+\newcommand{\calQ}{\mathcal{Q}} % caligraphic Q for another generic distribution
+\newcommand{\calF}{\mathcal{F}} % caligraphic F, typically for sigma-algebras
+\newcommand{\calG}{\mathcal{G}}
+\newcommand{\calX}{\mathcal{X}}
+\newcommand{\calC}{\mathcal{C}}
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\calD}{\mathcal{D}}
+\newcommand{\calK}{\mathcal{K}}
+
+\newcommand{\cutset}{\calC}
+\newcommand{\leftcutset}{\calC_{L}}
+\newcommand{\rightcutset}{\calC_{R}}
+
+\def\by{\bm{y}}
+\def\bx{\bm{x}}
+\def\bY{\bm{Y}}
+\def\bX{\bm{X}}
+
+\def\btheta{\boldsymbol{\theta}}
+\def\bTheta{\boldsymbol{\Theta}}
+\def\bmu{\boldsymbol{\mu}}
+\def\balpha{\boldsymbol{\alpha}}
+\def\bbeta{\boldsymbol{\beta}}
+\def\bgamma{\boldsymbol{\gamma}}
+
+\newcommand{\ind}[1]{\mathbbm{1}\left( #1 \right)} % indicator function, with an argument
+\newcommand{\var}[1]{\textrm{Var}\left( #1 \right)} % variance
+\newcommand{\cov}[2]{\textrm{Cov}\left( #1, #2 \right)} % covariance
+\newcommand{\sign}[1]{\textrm{sign}\left(#1\right)} % sign
+\newcommand{\parallelsum}{\mathbin{\|}} % for double bar to behave like a binary operation
+\newcommand{\kl}[2]{\textrm{KL}\left(#1 \mid \parallelsum \# \right)} % KL divergence with two arguments
+
+
+% distributions
+\newcommand{\normaldist}[2]{\mathcal{N}\left(#1,#2\right)} % normal distribution
+\newcommand{\mvnormaldist}[3]{\mathcal{N}_{#1}\left(#2,#3\right)} % multivariate normal distribution
+\newcommand{\gammadist}[2]{\textrm{Gamma}\left(#1,#2\right)} % gamma distribution
+\newcommand{\igammadist}[2]{\textrm{Inv.~Gamma}\left(#1,#2\right)} % inverse gamma
+\newcommand{\binomialdist}[2]{\textrm{Binomial}\left(#1,#2\right)} % Binomial
+\newcommand{\berndist}[1]{\textrm{Bernoulli}\left(#1\right)} % Bernoulli
+\newcommand{\poisdist}[1]{\textrm{Poisson}\left(#1\right)} % Poisson
+\newcommand{\hafltdist}[2]{\textrm{half-t}_{\#1}\left(#2\right)} %half-t
+\newcommand{\unifdist}[2]{\textrm{Uniform}\left(#1,#2\right)} % uniform
+\newcommand{\betadist}[2]{\textrm{Beta}\left(#1,#2\right)} % Beta distribution
+
+\hypersetup{pdfborder = {0 0 0.5 [3 3]}, colorlinks = true, linkcolor = BadgerRed, citecolor = SkyBlue, urlcolor = SkyBlue}
+
+

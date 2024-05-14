@@ -1,0 +1,101 @@
+% Copyright 2004 by Manuel Carro <mcarro@fi.upm.es>
+% Edited by Benjamin French <benjamin.c.french@gmail.com>
+%
+% This file may be distributed and/or modified
+%
+% 1. under the LaTeX Project Public License and/or
+% 2. under the GNU Public License.
+%
+% See the file doc/licenses/LICENSE for more details.
+
+\ProvidesPackageRCS $Header: /cvsroot/latex-beamer/latex-beamer/themes/theme/beamerthemeBoadilla.sty,v 1.2 2007/01/28 20:48:30 tantau Exp $
+
+\mode<presentation>
+
+\newif\ifbeamer@secheader
+\beamer@secheaderfalse
+
+\DeclareOptionBeamer{secheader}{\beamer@secheadertrue}
+\ProcessOptionsBeamer
+
+%\usecolortheme{Penn}
+\usecolortheme{UWMadison}
+\useoutertheme{infolines}
+\useinnertheme[shadow]{rounded}
+
+% Create my titlepage
+
+% Redefine for lectures
+\defbeamertemplate*{title page}{UWMadison}{
+
+\vskip 2.75cm
+
+\centering \Large \usebeamercolor[fg]{title}\inserttitle
+
+\ifx\insertsubtitle\@empty
+\else \normalsize \usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle
+\fi
+
+\vskip 0.75cm
+ {\usebeamercolor[fg]{author}\large \insertauthor}
+\vskip 0.25cm
+ {\usebeamercolor{institute}\normalsize\insertinstitute}
+ \vskip 0.25cm
+{\usebeamercolor{date}\normalsize\insertdate}
+ \vfill
+}
+
+
+%\defbeamertemplate*{title page}{UWMadison}{
+%  \begin{picture}(0,0)
+%  \setlength{\unitlength}{1cm}
+%  \protect\put(0,0){
+  %\begin{picture}(6,6)(-7.85,6.8)
+%    \begin{picture}(6,6)(-5.5,8)
+%  \includegraphics[scale = 1.5]{Logo}
+      %\includegraphics[scale = 1]{csail-logo.eps}
+%  \end{picture}
+%  }
+%  \end{picture}
+%  \vfill
+%  \raggedright
+%  {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+%  {\ifx\insertsubtitle\@empty
+%  \else
+%  \usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par
+%  \fi
+%  }   
+%  \vskip 2.75cm
+%  {\usebeamercolor[fg]{author}\usebeamerfont{author}\insertauthor}
+  %\vskip 0.25cm
+  %{\usebeamercolor{institute}\usebeamerfont{institute}\insertinstitute}
+%  \vskip 2.5cm
+%  {\usebeamercolor{date}\usebeamerfont{date}\insertdate}
+%  \vfill
+%}
+
+% Tills' opinion: should be done in an inner theme, not here
+
+\usesubitemizeitemtemplate{%
+    \tiny\raise1.5pt\hbox{\color{beamerstructure}$\blacktriangleright$}%
+}
+\usesubsubitemizeitemtemplate{%
+    \tiny\raise1.5pt\hbox{\color{beamerstructure}$\bigstar$}%
+}
+
+\setbeamersize{text margin left=1em,text margin right=1em}
+
+\ifbeamer@secheader\else\setbeamertemplate{headline}[default]\fi
+
+
+\setbeamercovered{transparent}
+\setbeamertemplate{itemize item}[circle]
+\setbeamertemplate{enumerate item}[default]
+\setbeamertemplate{section in toc}[default]
+\setbeamertemplate{subsection in toc}[default]
+\setbeamertemplate{navigation symbols}{}
+
+
+
+\mode
+<all>
