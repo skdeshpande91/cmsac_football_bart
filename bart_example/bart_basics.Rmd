@@ -1,0 +1,336 @@
+---
+title: "BART Basics"
+output: rmarkdown::github_document
+date: '2024-05-18'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Setup
+We'll start by loading a color-blind friendly palette
+```{r}
+my_colors <- c("#999999", "#E69F00", "#56B4E9", "#009E73", 
+               "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+
+## BART in one dimension
+We will illustrate the use of the **BART** package using a simple synthetic data example in which the input $\mathrm{x}$ is one-dimensional.
+For this example, we will generate $n$ pairs $(x_{1}, y_{1}), \ldots, (x_{n}, y_{n})$ of covariates $x_{i} \in [0,1]$ and outcomes $y_{i} \in \mathbb{R}$ where $y_{n} \sim \mathcal{N}(f(x_{i}), 1).$ 
+We will use a rather non-linear function $f,$ which is defined in the following code block.
+```{r define-rff-function}
+set.seed(129)
+D <- 5000
+omega0 <- rnorm(n = D, mean = 0, sd = 1.5)
+b0 <- 2 * pi * runif(n = D, min = 0, max = 1)
+beta0 <- rnorm(n = D, mean = 0, sd = 2*1/sqrt(D))
+
+f0 <- function(x){
+  if(length(x) == 1){
+    phi <- sqrt(2) * cos(b0 + omega0*x)
+    out <- sum(beta0 * phi)
+  } else{
+    phi_mat <- matrix(nrow = length(x), ncol = D)
+    for(d in 1:D){
+      phi_mat[,d] <- sqrt(2) * cos(b0[d] + omega0[d] * x)
+    }
+    out <- phi_mat %*% beta0
+  }
+  return(out)
+}
+```
+To visualize the function, we define a grid of values between -5 and 5 and evaluated the function at every point in the grid.
+```{r visualize-f0, out.width = "40%", out.height="22.5%", fig.align = 'center'}
+x_grid <- seq(-5, 5, by = 0.01)
+f_grid <- f0(x_grid)
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", xlim = c(-5,5), ylim = c(-8.5, 8.5),
+     xlab = expression(x), ylab = expression(y))
+lines(x_grid, f_grid, col = my_colors[8], lwd = 2)
+```
+
+### Generate data
+
+```{r generate-f0-data, out.width = 40%, out.height=22.5%}
+set.seed(518)
+sigma <- 1
+x_train <- data.frame(x = sort(runif(1e4, -5, 5)))
+f_train <- f0(x_train$x)
+
+y_train <- f_train + rnorm(1e4, mean = 0, sd = sigma)
+
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(1, type = "n", xlim = c(-5,5), ylim = c(-8.5, 8.5),
+     xlab = expression(x), ylab = expression(y))
+lines(x_grid, f_grid, col = my_colors[8], lwd = 2)
+points(x_train[,1], y_train, pch = 16, cex = 0.2, col = my_colors[1])
+```
+
+### Running BART
+We will use the function `wbart()` from the **BART** package.
+By default, it simulations a Markov chain for 1100 iterations and discards the first 100 as "burn-in."
+It also prints a lot of output to the console, most of which can be safely ignored for now.
+```{r f0-run-wbart}
+fit1 <-
+  BART::wbart(x.train = x_train,
+              y.train = y_train)
+```
+The function `wbart()` returns, essentially, a list with several components
+```{r fit1-names}
+names(fit1)
+```
+At this point, the most important components are `yhat.train`, which is a matrix containing posterior samples of $f(x_i),$ `yhat.train.mean,` which is a vector containing the posterior means of the $f(x_i),$ and `sigma,` which is a vector containing **all** samples of $\sigma$ (including burn-in). 
+Note that `yhat.train.mean` is just the vector of column means of `yhat.train`.
+
+Let's start by visualizing a traceplot of the $\sigma$ samples:
+```{r sigma-traceplot, out.width = "40%", out.height = "22.5%"}
+par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))
+plot(fit1$sigma, type = "l", xlab = "Iteration", ylab = "sigma", main = "Traceplot for sigma")
+abline(h = sigma, col = my_colors[3])
+abline(v = 100, lty = 2, col = my_colors[1])
+```
+We see that all the posterior samples of $\sigma$ bounce around in a region just above the value used to generate our data ($\sigma = 1$).
+While this is not quite "proof" that the MCMC has converged, it does indicate that after the first 100 iterations, the Markov chain is exploring tree ensemble space in such a way that the overall fit to data (as measured by $\sigma$) is relatively stable.
+
+To see that BART actually did a pretty decent job at estimating $f(x_i),$ we will plot the posterior mean of the evaluations against the true values of $f.$
+```{r, out.width = "40%", out.height="22.5%", fig.align='center'}
+fit_range <- c(-1.01,1.01) * max(abs(c(f_train, fit1$yhat.train.mean)))
+plot(1, type = "n", xlim = fit_range, ylim = fit_range, main = "Actual vs fitted",
+     xlab = "Actual", ylab = "Fitted")
+points(f_train, fit1$yhat.train.mean, pch = 16, cex = 0.2, col = my_colors[1])
+abline(a = 0, b = 1, col = my_colors[3])
+```
+It is reassuring to see that, for the most part, all the points line up close to the 45-degree diagonal line!
+
+### Uncertainty Quantification
+To this point, we have only focused on the point predictions.
+But a main draw of the Bayesian paradigm is the ease with which we can quantify our uncertainty.
+We'll start by computing pointwise posterior credible intervals for evaluations $f(x)$ for each point on the grid.
+The code below creates a new data frame (`grid_pred_sum`) with columns containing the posterior mean and several quantiles of each evaluation.
+```{r f0-train-summary}
+fit1_sum <-
+  data.frame(
+    MEAN = apply(fit1$yhat.train, MARGIN = 2, FUN = mean),
+    L95 = apply(fit1$yhat.train, MARGIN = 2, FUN = quantile, probs = 0.025),
+    L80 = apply(fit1$yhat.train, MARGIN = 2, FUN = quantile, probs = 0.1),
+    L50 = apply(fit1$yhat.train, MARGIN = 2, FUN = quantile, probs = 0.25),
+    U50 = apply(fit1$yhat.train, MARGIN = 2, FUN = quantile, probs = 0.75),
+    U80 = apply(fit1$yhat.train, MARGIN = 2, FUN = quantile, probs = 0.9),
+    U95 = apply(fit1$yhat.train, MARGIN = 2, FUN = quantile, probs = 0.975))
+```
+
+We can visualize these pointwise intervals and posterior means as a function of $x$
+```{r fit-train-plot, out.width = "40%", out.height = "22.5%", fig.align='center'}
+y_lim <- c(-1.01, 1.01) * max(abs(fit1_sum))
+plot(1, type = "n", xlim = c(-5,5), ylim = y_lim,
+     xlab = "x", ylab = "y", main= "Pointwise uncertainty quantification")
+polygon(x = c(x_train$x, rev(x_train$x)),
+        y = c(fit1_sum$L95, rev(fit1_sum$U95)),
+        border = NA,
+        col = adjustcolor(my_colors[2], alpha.f = 0.15))
+polygon(x = c(x_train$x, rev(x_train$x)),
+        y = c(fit1_sum$L80, rev(fit1_sum$U80)),
+        border = NA,
+        col = adjustcolor(my_colors[2], alpha.f = 0.15))
+polygon(x = c(x_train$x, rev(x_train$x)),
+        y = c(fit1_sum$L50, rev(fit1_sum$U50)),
+        border = NA,
+        col = adjustcolor(my_colors[2], alpha.f = 0.15))
+lines(x_train$x, fit1_sum$MEAN, col = my_colors[2], lwd = 2)
+lines(x_train$x, f_train, col = my_colors[8])
+```
+
+
+
+### Making a prediction
+
+There are two main ways to make predictions about function evaluations $f(x^{\star})$ for some new $x^{\star}$ that is not necessarily in the training dataset.
+The first way (and for many years, the only way) was to pass those new $x$ values to `wbart` in the initial call using the `x.test` argument.
+That is, one would supply both the training and testing data when calling `wbart` and the function would return samples of $f$ evaluated at every training point (in `yhat.train`) and every testing point (`yhat.test`).
+While this is useful if you are running a cross-validation-like study and have clearly defined training/testing splits, it is less useful if you want to use the fitted BART model in downstream applications where the new $x$ values are not available at train-time.
+Somewhat more recently, the **BART** maintainers added functionality so that one could call the `predict` function.
+This allows users to fit a BART model in one session, save the returned object, load the returned in a different session, and make predictions at new inputs.
+
+To demonstrate, we will draw posterior samples of $f(x)$ for every $x$ in that grid that we defined earlier `x_grid`.
+```{r f0-grid-predict}
+grid_predict <- predict(object = fit1, newdata = data.frame(x = x_grid))
+```
+The object `grid_predict` is a large matrix where the rows index MCMC draws and the columns correspond to rows of the data frame containing the new points.
+Let us see how these predictions compare to the actual valu
+```{r f0-grid-predict, out.width = "40%", out.height = "40%", fig.align = "center"}
+plot(1, type = "n", xlim = fit_range, ylim = fit_range, main = "Actual vs fitted",
+     xlab = "Actual", ylab = "Fitted")
+points(f_grid, colMeans(grid_predict), pch = 16, cex = 0.2, col = my_colors[1])
+abline(a = 0, b = 1, col = my_colors[3])
+```
+
+## Variable selection
+To see that BART works well even with lots of input variables, let's consider a variant of the [Friedman function](https://www.sfu.ca/~ssurjano/fried.html), which is often used to test implementations of BART.
+The Friedman function is nice because it features non-linearities, interactions, and linear terms.
+For our example, we will generate $p$-dimensional covariates $\mathbf{x} = (x_{1}, \ldots, x_{p})^{\top} \in [0,1]^{p}$ covariates and generate observations $y \sim \mathcal{N}(f(\textrm{x}), 2.5^{2})$ where
+$$
+f(\mathbf{x}) = 10\times \sin{\left(\pi x_{1}x_{2}\right)} + 20 \times (x_{3} - 0.5)^{2} + 10 \times x_{4} + 5 \times x_{5}
+$$
+Our implementation of the Friedman function is below. Note that it checks whether the input has at least five dimensions.
+```{r define_friedman}
+friedman <- function(x){
+  if(ncol(x) < 5) stop("x_cont needs to have at least five columns")
+  
+  if(!all(abs(x-0.5) <= 0.5)){
+    stop("all entries in x_cont must be between 0 & 1")
+  } else{
+    return(10 * sin(pi*x[,1]*x[,2]) + 20 * (x[,3] - 0.5)^2 + 10*x[,4] + 5 * x[,5])
+  }
+}
+```
+
+
+In the code below, we generate 5000 noisy training observations with $p = 20$ and also 1000 test set points, which we will us to assess the out-of-sample performance of BART.
+```{r generate-data}
+n <- 5000
+n_test <- 1000
+p <- 20
+set.seed(99)
+X <- matrix(runif(n*p, min = 0, max = 1), nrow = n, ncol = p,
+            dimnames = list(c(), paste0("X", 1:p)))
+X_test <- matrix(runif(n_test * p, min = 0, max = 1), nrow = n, ncol = p,
+                 dimnames = list(c(), paste0("X", 1:p)))
+
+mu <- friedman(X)
+mu_test <- friedman(X_test)
+
+sigma <- 1
+set.seed(99)
+
+y <- mu + sigma * rnorm(n, mean = 0, sd = 1)
+```
+
+And now we fit our BART model, stack the `varcount` matrices, and see which variables are used at least once in an ensemble in at least 50% of posterior draws.
+```{r friedman-dense, results='hide'}
+dense_chain1 <- BART::wbart(x.train = X, y.train = y, x.test = X_test, sparse = FALSE)
+dense_chain2 <- BART::wbart(x.train = X, y.train = y, x.test = X_test, sparse = FALSE)
+dense_chain3 <- BART::wbart(x.train = X, y.train = y, x.test = X_test, sparse = FALSE)
+dense_chain4 <- BART::wbart(x.train = X, y.train = y, x.test = X_test, sparse = FALSE)
+
+dense_varcount <- rbind(dense_chain1$varcount, 
+                         dense_chain2$varcount,
+                         dense_chain3$varcount,
+                         dense_chain4$varcount)
+colnames(dense_varcount) <- colnames(X)
+
+dense_varprob <- colMeans(dense_varcount >= 1)
+which(dense_varprob > 0.5)
+
+```
+
+```{r friedman-dense, results='hide'}
+sparse_chain1 <- BART::wbart(x.train = X, y.train = y, x.test = X_test, sparse = TRUE)
+sparse_chain2 <- BART::wbart(x.train = X, y.train = y, x.test = X_test, sparse = TRUE)
+sparse_chain3 <- BART::wbart(x.train = X, y.train = y, x.test = X_test, sparse = TRUE)
+sparse_chain4 <- BART::wbart(x.train = X, y.train = y, x.test = X_test, sparse = TRUE)
+
+sparse_varcount <- rbind(sparse_chain1$varcount, 
+                         sparse_chain2$varcount,
+                         sparse_chain3$varcount,
+                         sparse_chain4$varcount)
+colnames(sparse_varcount) <- colnames(X)
+sparse_varprob <- colMeans(sparse_varcount >= 1)
+which(sparse_varprob > 0.5)
+```
+
+And let us compare the predictions
+```{r compare-preds}
+dense_yhat <- 
+  0.25 * (dense_chain1$yhat.test.mean + 
+            dense_chain1$yhat.test.mean + 
+            dense_chain3$yhat.test.mean +
+            dense_chain4$yhat.test.mean)
+
+sparse_yhat <- 
+  0.25 * (sparse_chain1$yhat.test.mean + 
+            sparse_chain1$yhat.test.mean + 
+            sparse_chain3$yhat.test.mean +
+            sparse_chain4$yhat.test.mean)
+
+mean( (mu_test - dense_yhat)^2 )
+mean( (mu_test - sparse_yhat)^2 )
+```
+
+## Alternate implementations
+
+
+[**flexBART**](https://github.com/skdeshpande91/flexBART) is often much faster than **BART** because it avoids a lot of redundant computations.
+The speedup really manifests when you have lots of data, which we will demonstrate using the Friedman function.
+Before proceeding, a few remarks are in order:
+
+  1. Whereas **BART** allows users to pass a single data frame or matrix of covariates/inputs, **flexBART** requires users to pass up to two *matrices*, one for continuous covariates and one for categorical covariates. 
+  2. **flexBART** *assumes* that the continuous covariates have been re-scaled to the interval [-1,1] and that categorical covariates have been re-coded as non-negative integers starting from 0.
+  3. **BART** initializes the parameter $\sigma$ in a slightly different way than **flexBART** so the actual answers will be a bit different.
+
+Now let's generate some data.
+```{r generate_data}
+n <- 10000
+n_test <- 1000
+p_cont <- 10
+set.seed(99)
+X <- matrix(runif(n*p_cont, min = -1, max = 1), nrow = n, ncol = p_cont)
+X_test <- matrix(runif(n_test * p_cont, min = -1, max = 1), nrow = n, ncol = p_cont)
+
+mu <- friedman(X)
+mu_test <- friedman(X_test)
+
+sigma <- 1
+set.seed(99)
+
+y <- mu + sigma * rnorm(n, mean = 0, sd = 1)
+
+# Containers to store the performance results
+rmse_train <- c("flexBART" = NA, "BART" = NA)
+rmse_test <- c("flexBART" = NA, "BART" = NA)
+timing <- c("flexBART" = NA, "BART" = NA)
+```
+
+We're now ready to run both `BART::wbart` and `flexBART::flexBART`. Note that we have hidden the printed output.
+
+```{r bart_fit, results = 'hide'}
+bart_time <-
+  system.time(
+    bart_fit <-
+      BART::wbart(x.train = X, y.train = y, x.test = X_test,
+                  ndpost = 1000, nskip = 1000))
+rmse_train["BART"] <- sqrt(mean( (mu - bart_fit$yhat.train.mean)^2 ))
+rmse_test["BART"] <- sqrt(mean( (mu_test - bart_fit$yhat.test.mean)^2 ))
+timing["BART"] <- bart_time["elapsed"]
+
+```
+
+
+```{r flex_fit, results = 'hide'}
+flex_time <-
+  system.time(
+    flex_fit <- 
+      flexBART::flexBART(Y_train = y, 
+                         X_cont_train = X, X_cont_test = X_test))
+rmse_train["flexBART"] <- sqrt(mean( (mu - flex_fit$yhat.train.mean)^2 ))
+rmse_test["flexBART"] <- sqrt(mean( (mu_test - flex_fit$yhat.test.mean)^2 ))
+timing["flexBART"] <- flex_time["elapsed"]
+```
+
+
+
+
+```{r performance, results = 'hold'}
+print("Training RMSE")
+print(round(rmse_train, digits = 3))
+
+print("Testing RMSE")
+print(round(rmse_test, digits = 3))
+
+print("Timing (seconds):")
+print(round(timing, digits = 3))
+
+```
+
+
