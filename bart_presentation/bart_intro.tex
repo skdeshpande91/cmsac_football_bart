@@ -29,7 +29,6 @@
 \item{Prop.\ of time $\P(\texttt{catch})$ exceeds a threshold (e.g., 80\%)}
 \item{Prop.\ of time QB threw to target w/ highest $\P(\texttt{catch})$ on play (EHCP)}
 \end{itemize}
-%\item[\Smiley]{Don't know $\P(\texttt{catch})$ exactly but can estimate w/ tracking data}
 \end{itemize}
 
 \visible<2->{
@@ -283,7 +282,7 @@ $$
 \end{itemize}
 }
 \visible<3->{
-\item{\href{https://www.tandfonline.com/doi/full/10.1080/01621459.2016.1264957}{Linero (2016)} modifies BART so that}
+\item{\href{https://www.tandfonline.com/doi/full/10.1080/01621459.2016.1264957}{Linero (2018)} modifies BART so that}
 \begin{itemize}
 \item{Split on $X_{j}$ with prob. $\theta_{j}$ (in prior \& in MH transition)}
 \item{$\boldsymbol{\theta}$ given a sparsity-inducing Dirichlet prior}
@@ -323,11 +322,12 @@ $$
 
 \begin{itemize}
 \item{BART: approximate $f$ with sum of regression trees}
-\item{Avoids detailed pre-specification of functional form of $f(\bx) = \E[Y \mid X = \bx]$}
+\item{Avoids pre-specification of functional form of $f(\bx) = \E[Y \mid X = \bx]$}
 \item{Excellent performance off-the-shelf}
+\item{Lots still in development ... get in touch!}
 \end{itemize}
 
-\visible<3->{
+\visible<2->{
 \vskip 0.5cm
 \makebox[0.95\paperwidth]{
 \hfill
@@ -340,13 +340,10 @@ $$
 Email: \texttt{\textcolor{BadgerRed}{sameer.deshpande@wisc.edu}} \hfill
 }
 \makebox[0.95\paperwidth]{
-Package: \url{https://github.com/skdeshpande91/flexBART} \hfill
-}
-\makebox[0.95\paperwidth]{
 Website: \url{https://skdeshpande91.github.io} \hfill
 }
 \makebox[0.95\paperwidth]{
-Preprint: \href{https://arxiv.org/abs/2211.04459}{[arXiv:2211.04456]} \hfill
+Twitter: @skdeshpande91 \hfill
 }
 }
 \end{frame}
@@ -379,7 +376,7 @@ Preprint: \href{https://arxiv.org/abs/2211.04459}{[arXiv:2211.04456]} \hfill
 \begin{itemize}
 \visible<1->{
 \item{Branching process prior on graphical structure}
-\item{Overwhelming prior prob. that tree depth < 5}
+\item{Overwhelming prior prob. that tree depth $< 5$}
 }
 \visible<2->{
 \item{Decision rule $\{X_{j} \in \mathcal{C}\}$}
