@@ -174,6 +174,7 @@ abline(v = 100, lty = 2, col = my_colors[1])
 ```
 
 <img src="bart_basics_files/figure-gfm/sigma-traceplot-1.png" width="40%" height="22.5%" style="display: block; margin: auto;" />
+
 We see that all the posterior samples of
 ![\sigma](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;%5Csigma "\sigma")
 bounce around in a region just above the value used to generate our data
@@ -377,12 +378,10 @@ session, and make predictions at new inputs.
 
 To demonstrate, we will draw posterior samples of
 ![f(x)](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;f%28x%29 "f(x)")
-for every
-![x](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;x "x")
-in that grid that we defined earlier `x_grid`.
+for the test set again
 
 ``` r
-grid_predict <- predict(object = fit1, newdata = data.frame(x = x_grid))
+test_predict <- predict(object = fit1, newdata = x_test)
 ```
 
     ## *****In main of C++ for bart prediction
@@ -390,7 +389,7 @@ grid_predict <- predict(object = fit1, newdata = data.frame(x = x_grid))
     ## number of bart draws: 1000
     ## number of trees in bart sum: 200
     ## number of x columns: 1
-    ## from x,np,p: 1, 1001
+    ## from x,np,p: 1, 1000
     ## ***using serial code
 
 The object `grid_predict` is a large matrix where the rows index MCMC
@@ -401,7 +400,7 @@ values
 ``` r
 plot(1, type = "n", xlim = fit_range, ylim = fit_range, main = "Actual vs fitted",
      xlab = "Actual", ylab = "Fitted")
-points(f_grid, colMeans(grid_predict), pch = 16, cex = 0.4, col = my_colors[1])
+points(f_test, colMeans(test_predict), pch = 16, cex = 0.4, col = my_colors[1])
 abline(a = 0, b = 1, col = my_colors[3])
 ```
 
@@ -538,17 +537,17 @@ on inactive variables. Often (but not always) running `wbart()`with
 
 ``` r
 dense_yhat <- 
-  0.25 * (chain1$yhat.test.mean + 
-          chain2$yhat.test.mean + 
-          chain3$yhat.test.mean +
-          chain4$yhat.test.mean)
+  rowMeans(cbind(chain1$yhat.test.mean, 
+          chain2$yhat.test.mean, 
+          chain3$yhat.test.mean,
+          chain4$yhat.test.mean))
 
 sparse_yhat <- 
-  0.25 * (sparse_chain1$yhat.test.mean + 
-          sparse_chain2$yhat.test.mean + 
-          sparse_chain3$yhat.test.mean +
-          sparse_chain4$yhat.test.mean)
-
+  rowMeans(cbind(sparse_chain1$yhat.test.mean,
+                 sparse_chain2$yhat.test.mean,
+                 sparse_chain3$yhat.test.mean,
+                 sparse_chain4$yhat.test.mean))
+  
 mean( (mu_test - dense_yhat)^2 )
 ```
 
@@ -640,7 +639,7 @@ bart_time <-
     ## done 1700 (out of 2000)
     ## done 1800 (out of 2000)
     ## done 1900 (out of 2000)
-    ## time: 180s
+    ## time: 179s
     ## check counts
     ## trcnt,tecnt,temecnt,treedrawscnt: 1000,1000,1000,1000
 
@@ -676,7 +675,7 @@ print(round(timing, digits = 2))
 ```
 
     ## flexBART     BART 
-    ##    62.64   180.78
+    ##    62.50   179.46
 
 ``` r
 par(mar = c(3,3,2,1), mgp = c(1.8, 0.5, 0))

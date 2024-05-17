@@ -198,16 +198,16 @@ While this is useful if you are running a cross-validation-like study and have c
 Somewhat more recently, the **BART** maintainers added functionality so that one could call the `predict` function.
 This allows users to fit a BART model in one session, save the returned object, load the returned in a different session, and make predictions at new inputs.
 
-To demonstrate, we will draw posterior samples of $f(x)$ for every $x$ in that grid that we defined earlier `x_grid`.
+To demonstrate, we will draw posterior samples of $f(x)$ for the test set again
 ```{r f0-predict}
-grid_predict <- predict(object = fit1, newdata = data.frame(x = x_grid))
+test_predict <- predict(object = fit1, newdata = x_test)
 ```
 The object `grid_predict` is a large matrix where the rows index MCMC draws and the columns correspond to rows of the data frame containing the new points.
 Let us see how these predictions compare to the actual values
 ```{r f0-grid-predict, out.width = '40%', out.height = '40%', fig.align = 'center'}
 plot(1, type = "n", xlim = fit_range, ylim = fit_range, main = "Actual vs fitted",
      xlab = "Actual", ylab = "Fitted")
-points(f_grid, colMeans(grid_predict), pch = 16, cex = 0.4, col = my_colors[1])
+points(f_test, colMeans(test_predict), pch = 16, cex = 0.4, col = my_colors[1])
 abline(a = 0, b = 1, col = my_colors[3])
 ```
 
@@ -304,17 +304,17 @@ We see that every posterior sample of the tree ensemble contained a decision rul
 Often (but not always) running `wbart()`with `sparse = TRUE` yields more accurate predictions.
 ```{r compare-preds}
 dense_yhat <- 
-  0.25 * (chain1$yhat.test.mean + 
-          chain2$yhat.test.mean + 
-          chain3$yhat.test.mean +
-          chain4$yhat.test.mean)
+  rowMeans(cbind(chain1$yhat.test.mean, 
+          chain2$yhat.test.mean, 
+          chain3$yhat.test.mean,
+          chain4$yhat.test.mean))
 
 sparse_yhat <- 
-  0.25 * (sparse_chain1$yhat.test.mean + 
-          sparse_chain2$yhat.test.mean + 
-          sparse_chain3$yhat.test.mean +
-          sparse_chain4$yhat.test.mean)
-
+  rowMeans(cbind(sparse_chain1$yhat.test.mean,
+                 sparse_chain2$yhat.test.mean,
+                 sparse_chain3$yhat.test.mean,
+                 sparse_chain4$yhat.test.mean))
+  
 mean( (mu_test - dense_yhat)^2 )
 mean( (mu_test - sparse_yhat)^2 )
 ```
