@@ -15,11 +15,12 @@
 \titlepage
 \end{frame}
 
-\section{Motivations}
+\section{Preliminaries}
 \begin{frame}[noframenumbering]{Overview}
 \tableofcontents
 \end{frame}
 
+\begin{comment}
 \begin{frame}{Catch probability \& QB rankings}
 \begin{itemize}
 \item{Which QB's throw the ``most catchable'' balls?}
@@ -53,8 +54,9 @@
 \end{itemize}
 }
 \end{frame}
+\end{comment}
 
-\begin{frame}{A more general problem: nonparametric regression}
+\begin{frame}{Nonparametric regression \& classification}
 
 \begin{itemize}
 \item{Observe $(\bx_{1}, y_{1}), \ldots, (\bx_{n}, y_{n})$ and model}
@@ -68,6 +70,9 @@ $$
 \item{Variable importance/selection: on which $X_{j}$ does $f$ depend?}
 \end{itemize}
 
+\visible<2->{
+\item{Classification w/ probit link: $\P(Y = 1) = \Phi(f(\bx))$}
+}
 \end{itemize}
 \end{frame}
 
@@ -116,7 +121,7 @@ $$
 \centering
 \includegraphics[width = 0.9\textwidth]{figures/sum_of_trees_smooth}
 \end{column}
-\visible<2->{
+
 \begin{column}{0.3\textwidth}
 \centering
 \includegraphics[width = \textwidth]{figures/old_decision_rule}
@@ -125,17 +130,17 @@ $$
 \centering
 \includegraphics[width = \textwidth]{figures/old_partition}
 \end{column}
-}
+
 \end{columns}
 
 \begin{itemize}
 \item{Step functions are universal function approximators!}
-\visible<2->{
+
 \item{Step functions can be represented as binary regression trees}
-}
-\visible<3->{
+
+
 \item[\Walley]{Often need very deep tree to appx complicated $f$ well}
-}
+
 \end{itemize}
 
 \end{frame}
