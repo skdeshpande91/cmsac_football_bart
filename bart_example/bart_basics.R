@@ -51,9 +51,12 @@ lines(x_grid, f_grid, col = my_colors[8], lwd = 2)
 points(x_train[,1], y_train, pch = 16, cex = 0.2, col = my_colors[1])
 
 # Run BART
+
 fit1 <-
   BART::wbart(x.train = x_train,
               y.train = y_train)
+
+names(fit1)
 
 # Fitted vs actual
 fit_range <- c(-1.01,1.01) * max(abs(c(f_train, fit1$yhat.train.mean)))
@@ -152,7 +155,6 @@ mu_test <- friedman(X_test)
 
 sigma <- 1
 set.seed(99)
-
 y <- mu_train + sigma * rnorm(n_train, mean = 0, sd = 1)
 
 # Variable selection
@@ -184,7 +186,7 @@ colnames(sparse_varcount) <- colnames(X_train)
 sparse_varprob <- colMeans(sparse_varcount >= 1)
 round(sparse_varprob, digits = 3)
 
-# Compare MSE for sprase = FALSE and sparse  = TRUE
+# Compare MSE for sparse = FALSE and sparse  = TRUE
 dense_yhat <- 
   rowMeans(cbind(chain1$yhat.test.mean, 
                  chain2$yhat.test.mean, 
@@ -202,7 +204,7 @@ mean( (mu_test - sparse_yhat)^2 )
 
 
 # flexBART
-rescaled_X_train <- X_train *2 - 1
+rescaled_X_train <- X_train * 2 - 1
 rescaled_X_test <- X_test * 2 - 1
 
 # Containers to store the performance results
