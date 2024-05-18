@@ -37,4 +37,4 @@ y_all <- f_all + rnorm(10, mean = 0, sd = sigma)
 points(x_all, y_all, pch = 16)
 save(D, omega0, b0, beta0, f0, x_grid, f_grid, 
      x_all, f_all, y_all, sigma,
-     file = "gp_data.RData")
+     file = "sumoftrees_data.RData")

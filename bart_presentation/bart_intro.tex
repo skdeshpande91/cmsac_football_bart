@@ -69,20 +69,22 @@
 \begin{frame}{Nonparametric regression \& classification}
 
 \begin{itemize}
-\item{Observe $(\bx_{1}, y_{1}), \ldots, (\bx_{n}, y_{n})$ and model}
-$$
-y_{n} = f(\bx_{n}) + \sigma \epsilon_{n}; \epsilon_{n} \sim \normaldist{0}{1}
-$$
-\item{We have the following goals:}
+\item{Observed data: $(\bx_{1}, y_{1}), \ldots, (\bx_{n}, y_{n})$ with $\bx_{n} \in [0,1]^{p}$}
+\item{Regression: $y_{n} = f(\bx_{n}) + \sigma \epsilon_{n}; \epsilon_{n} \sim \normaldist{0}{1}$}
+\item{Classification (w/ probit link): $\P(Y = 1) = \Phi(f(\bx))$}
+%$$
+%y_{n} = f(\bx_{n}) + \sigma \epsilon_{n}; \epsilon_{n} \sim \normaldist{0}{1}
+%$$
+\item{Simultaneous (and often competing) goals:}
 \begin{itemize}
-\item{Prediction: value of $f(\bx^{\star})$ \& $y^{\star} = f(\bx^{\star}) + \sigma \epsilon^{\star}$}
+\item{Prediction: value of $f(\bx^{\star})$ \& $y^{\star}$}
 \item{UQ: uncertainty intervals for $f(\bx^{\star})$ \& $y^{\star}$}
 \item{Variable importance/selection: on which $X_{j}$ does $f$ depend?}
 \end{itemize}
 
-\visible<2->{
-\item{Classification w/ probit link: $\P(Y = 1) = \Phi(f(\bx))$}
-}
+%\visible<2->{
+%\item{Classification w/ probit link: $\P(Y = 1) = \Phi(f(\bx))$}
+%}
 \end{itemize}
 \end{frame}
 
@@ -127,16 +129,16 @@ $$
 
 \begin{columns}
 \centering
-\begin{column}{0.3\textwidth}
+\begin{column}{0.4\textwidth}
 \centering
-\includegraphics[width = 0.9\textwidth]{figures/sum_of_trees_smooth}
+\includegraphics[width = 0.9\textwidth]{figures/tree_appx}
 \end{column}
 
-\begin{column}{0.3\textwidth}
+\begin{column}{0.25\textwidth}
 \centering
 \includegraphics[width = \textwidth]{figures/old_decision_rule}
 \end{column}
-\begin{column}{0.3\textwidth}
+\begin{column}{0.25\textwidth}
 \centering
 \includegraphics[width = \textwidth]{figures/old_partition}
 \end{column}
