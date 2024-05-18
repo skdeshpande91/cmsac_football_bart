@@ -331,23 +331,21 @@ $$
 \begin{frame}{BART extensions}
 
 \begin{itemize}
-\item{Classification: probit w/ \href{https://www.tandfonline.com/doi/abs/10.1080/01621459.1993.10476321}{Albert \& Chib (1993)} data augmentation}
-\item{Survival models: \href{https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.6893}{Sparapani et al. (2016)}}
-\item{Log-linear models: \href{https://arxiv.org/abs/1701.01503}{Murray (2019)}}
+\item{Survival/time-to-event: \href{https://onlinelibrary.wiley.com/doi/abs/10.1002/sim.6893}{Sparapani et al. (2016)}}
+%\item{Log-linear models: \href{https://arxiv.org/abs/1701.01503}{Murray (2019)}}
 \item{Heteroscedasticity: \href{https://www.tandfonline.com/doi/abs/10.1080/10618600.2019.1677243?journalCode=ucgs20}{Pratola et al. (2020)}}
 \begin{itemize}
 \item{$y_{n} = f(\bx_{n}) + \sigma(\bx_{n})\varepsilon_{n}$, write $\log{(\sigma^{2}(\bx))}$ as a sum-of-trees! }
 \end{itemize}
 \item{Monotonic BART: \href{https://arxiv.org/abs/1612.01619}{Chipman et al. (2019)}}
-\item{Estimating smooth functions}
-\begin{itemize}
-\item{\href{https://projecteuclid.org/journals/annals-of-applied-statistics/volume-14/issue-1/BART-with-targeted-smoothing--An-analysis-of-patient-specific/10.1214/19-AOAS1268.short}{Starling et al. (2020)}: jumps $\mu_{\ell}$ are Gaussian processes}
-\end{itemize}
+\item{Smooth functions: \href{https://projecteuclid.org/journals/annals-of-applied-statistics/volume-14/issue-1/BART-with-targeted-smoothing--An-analysis-of-patient-specific/10.1214/19-AOAS1268.short}{Starling et al. (2020)}; Yee \& D. (2024+)}
 \item{Varying coefficient models: \href{https://arxiv.org/abs/2003.06416}{D. et al. (2020+)}}
 \begin{itemize}
 \item{$Y = \beta_{0}(Z) + \beta_{1}(Z)X_{1} + \cdots + \beta_{p}(Z)X_{p} + \sigma\epsilon$}
 \item{E.g. time \& demographic varying mediation effects}
 \end{itemize}
+\item{Expected runs/points: Yee \& D. (2024)}
+\item{Conditional density estimates: \href{https://arxiv.org/abs/2112.12259}{Orlandi et al. (2024+)}}
 \item{Causal inference: \href{https://www.tandfonline.com/doi/abs/10.1198/jcgs.2010.08162}{Hill (2011)} \& \href{https://projecteuclid.org/journals/bayesian-analysis/volume-15/issue-3/Bayesian-Regression-Tree-Models-for-Causal-Inference--Regularization-Confounding/10.1214/19-BA1195.full}{Hahn et al (2020)}}
 \end{itemize}
 
@@ -357,7 +355,7 @@ $$
 
 \begin{itemize}
 \item{BART: approximate $f$ with sum of regression trees}
-\item{Avoids pre-specification of functional form of $f(\bx) = \E[Y \mid X = \bx]$}
+\item{Avoids pre-specification of functional form of $f(\bx)$}
 \item{Excellent performance off-the-shelf}
 \item{Lots still in development ... get in touch!}
 \end{itemize}
