@@ -1,4 +1,4 @@
 \beamer@sectionintoc {1}{Preliminaries}{2}{0}{1}
-\beamer@sectionintoc {2}{Introducing BART}{11}{0}{2}
-\beamer@sectionintoc {3}{BART in practice}{14}{0}{3}
-\beamer@sectionintoc {4}{Parting Thoughts}{16}{0}{4}
+\beamer@sectionintoc {2}{Introducing BART}{14}{0}{2}
+\beamer@sectionintoc {3}{BART in practice}{17}{0}{3}
+\beamer@sectionintoc {4}{Parting Thoughts}{19}{0}{4}
