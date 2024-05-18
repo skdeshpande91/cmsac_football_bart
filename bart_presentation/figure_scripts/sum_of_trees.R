@@ -28,6 +28,25 @@ f_train <- f0(x_train)
 
 y_train <- f_train + 0.05*rnorm(100)
 
+
+# Single CART model
+train_df <- data.frame(x = x_train, y = y_train)
+cart_fit <- rpart::rpart(y~x, data = train_df)
+cart_yhat <- predict(cart_fit)
+
+png("../figures/treeapprx_cart.png", 
+    width = 6, height = 6*9/16, units = "in", res = 400)
+par(mar = c(3,3,2,1), mgp = c(1.8,0.5, 0), mfrow = c(1,2))
+plot(1, type = "n", xlim = c(-5,5), ylim = c(-7.5,7.5),
+     xlab = "x", ylab = "y", 
+     main = paste0("Tree appx (", length(unique(cart_yhat)), " leafs)"))
+lines(x_train, f_train, col = my_colors[8])
+lines(x_train, cart_yhat, col = my_colors[4])
+
+rpart.plot::rpart.plot(cart_fit)
+dev.off()
+
+
 bart_fit1 <- BART::wbart(x.train = x_train, y.train = y_train, ntree = 1)
 bart_fit5 <- BART::wbart(x.train = x_train, y.train = y_train, ntree = 5)
 bart_fit10 <- BART::wbart(x.train = x_train, y.train = y_train, ntree = 10)

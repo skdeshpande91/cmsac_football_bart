@@ -133,13 +133,15 @@ $$
 \centering
 \includegraphics[width = \textwidth]{figures/old_decision_rule}
 \end{column}
-\begin{column}{0.25\textwidth}
+\begin{column}{0.15\textwidth}
 \centering
 \includegraphics[width = \textwidth]{figures/old_partition}
 \end{column}
-\begin{column}{0.4\textwidth}
-\centering
-\includegraphics[width = 0.9\textwidth]{figures/tree_appx}
+\begin{column}{0.5\textwidth}
+\begin{overprint}
+\onslide<1>\centering\includegraphics[width = 0.9\textwidth]{figures/treeapprx_cart}
+\onslide<2>\centering\includegraphics[width = 0.9\textwidth]{figures/tree_appx}
+\end{overprint}
 \end{column}
 \end{columns}
 
@@ -148,9 +150,9 @@ $$
 
 \item{Step functions can be represented as binary regression trees}
 
-
+\visible<2->{
 \item[\Walley]{Often need very deep tree to appx complicated $f$ well}
-
+}
 \end{itemize}
 
 \end{frame}
